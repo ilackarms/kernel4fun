@@ -81,7 +81,7 @@ _start:
     #    interrupt occurring or due to a system management mode.
     cli
 1:  hlt
-    jmp lb
+    jmp 1b
 
 # Set the size of the _start symbol to the current location '.' minus its start.
 # This is useful when debugging or when you implement call tracing.
