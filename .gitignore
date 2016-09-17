@@ -1,0 +1,6 @@
+.idea
+CMakeCache.txt
+kernel4fun
+cmake_install.cmake
+CMakeFiles/
+Makefile
