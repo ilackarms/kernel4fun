@@ -1,3 +1,4 @@
 .idea
 boot.o
 kernel.o
+kernel.bin
