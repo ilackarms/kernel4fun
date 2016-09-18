@@ -82,18 +82,31 @@ void terminal_putentryat(unsigned char c, uint8_t color, size_t x, size_t y) {
     terminal_buffer[index] = vga_entry(c, color);
 }
 
+void move_terminal_rows_up() {
+    for (size_t y = 0; y < VGA_HEIGHT; y++) {
+        for (size_t x = 0; x < VGA_WIDTH; x++) {
+            const size_t index = y * VGA_WIDTH + x;
+            terminal_buffer[index] = terminal_buffer[index+VGA_WIDTH];
+        }
+    }
+}
+
 void terminal_putchar(unsigned char c) {
     if (c == '\n') {
         terminal_column = 0;
-        if (++terminal_row == VGA_HEIGHT)
-            terminal_row = 0;
+        if (++terminal_row == VGA_HEIGHT) {
+            terminal_row--;
+            move_terminal_rows_up();
+        }
         return;
     }
     terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
     if (++terminal_column == VGA_WIDTH) {
         terminal_column = 0;
-        if (++terminal_row == VGA_HEIGHT)
-            terminal_row = 0;
+        if (++terminal_row == VGA_HEIGHT) {
+            terminal_row--;
+            move_terminal_rows_up();
+        }
     }
 }
 
@@ -106,12 +119,33 @@ void terminal_writestring(const char* data) {
     terminal_write(data, strlen(data));
 }
 
+bool sleep_check;
+
+void fake_sleep(const size_t ms) {
+    size_t j = 0;
+    for (size_t i = 0; i < ms * 1000; i++) {
+        j += i;
+    }
+    if (j) {
+        sleep_check = !sleep_check;
+    }
+}
+
 #if defined(__cplusplus)
 extern "C" /* Use C linkage for kernel_main. */
 #endif
 void kernel_main(void) {
     /* initialize terminal interface */
     terminal_initialize();
-
-    terminal_writestring("Hubba hooge!\nHooba hooba!");
+    //print 250 lines, scroll
+    for (size_t i = 0; i < 250; i++){
+        for (size_t j = 0; j < i % 11; j++) {
+            terminal_writestring("p");
+        }
+        fake_sleep(20000);
+        terminal_writestring("\n");
+    }
+    if (sleep_check) {
+        terminal_writestring("Finished.\n");
+    }
 }
